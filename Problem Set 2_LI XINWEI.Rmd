@@ -1,0 +1,112 @@
+---
+title: "Problem Set 2 - Analytics Part"
+author: "Elaine, LI XINWEI"
+date: "12/07/2016"
+output:
+  html_document: default
+  pdf_document: default
+Student ID: 01272252
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+
+```
+
+```{r library & dataset}
+# Import the Necessary Libraries:
+library(pander)
+library(ggplot2)
+library(plyr)
+
+# Load the Necessary Data Sets:
+d1 <- read.csv("/Users/XINWEI_LI/Desktop/Analytics in Business/Problem Set 2/Dataset/2016-06-metropolitan-crimes.csv")
+d2 <- read.csv("/Users/XINWEI_LI/Desktop/Analytics in Business/Problem Set 2/Dataset/2016-07-metropolitan-crimes.csv")
+d3 <- read.csv("/Users/XINWEI_LI/Desktop/Analytics in Business/Problem Set 2/Dataset/2016-08-metropolitan-crimes.csv")
+d4 <- read.csv("/Users/XINWEI_LI/Desktop/Analytics in Business/Problem Set 2/Dataset/2016-09-metropolitan-crimes.csv")
+
+d5 <- read.csv("/Users/XINWEI_LI/Desktop/Analytics in Business/Problem Set 2/Dataset/2016-06-metropolitan-stop-and-search.csv")
+d6 <- read.csv("/Users/XINWEI_LI/Desktop/Analytics in Business/Problem Set 2/Dataset/2016-07-metropolitan-stop-and-search.csv")
+d7 <- read.csv("/Users/XINWEI_LI/Desktop/Analytics in Business/Problem Set 2/Dataset/2016-08-metropolitan-stop-and-search.csv")
+d8 <- read.csv("/Users/XINWEI_LI/Desktop/Analytics in Business/Problem Set 2/Dataset/2016-09-metropolitan-stop-and-search.csv")
+
+```
+
+## Part (a)
+
+According to the given information, the following operations are conducted:
+
+Merge the four datasets for "Stop&Search":
+
+```{r, results = "asis", tidy = TRUE}
+# Operate to Merge Every Two Datasets :
+stop_search <- rbind(d5, d6, d7, d8)
+
+# Remove NA Values for Columns "Latitude" & "Longitude":
+stop_search <- stop_search[complete.cases(stop_search[, "Latitude"]), ]
+stop_search <- stop_search[complete.cases(stop_search[, "Longitude"]), ]
+
+```
+
+Draw 1,000 Random Samples from "Stop&Search" Events:
+
+```{r, results = "asis", tidy = TRUE}
+# Draw 1,000 Random Samples:
+sample <- stop_search[sample(nrow(stop_search), 1000), ]
+
+```
+
+Output the Samples to A csv File:
+
+```{r, results = "asis", tidy = TRUE}
+# Create csv File for Easy Manipulation:
+input <- sample[, c("Latitude","Longitude")]
+write.csv(input, file = "/Users/XINWEI_LI/Desktop/Analytics in Business/Problem Set 2/input-with-geocode.csv", row.names = FALSE)
+
+```
+
+Load the Dataset with Grid Reference Included:
+```{r, results = "asis", tidy = TRUE}
+# Load the Dataset:
+output <- read.csv("/Users/XINWEI_LI/Desktop/Analytics in Business/Problem Set 2/output-with-grid-reference.csv")
+
+# Add the Dataset to the Original Dataset:
+sample <- cbind(sample, output)
+
+```
+
+## Part (b)
+
+#### (i)
+
+According to the given information, the following operations are conducted:
+
+Collapse the Data Based on the Outcome:
+
+```{r, results = "asis", tidy = TRUE}
+# Add Necessary Columns to the Data Frame:
+stop_search["Outcome_Category"] <- NA
+
+stop_search$Outcome <- as.factor(stop_search$Outcome)
+
+# Operate the Data Frame to Insert Necessary Values:
+for (i in 1:(nrow(stop_search))){
+  if (grepl(stop_search[i, "Outcome"], "Nothing found - no further action"))
+    stop_search[i, "Outcome_Category"] <- "Nothing"
+  else
+    stop_search[i, "Outcome_Category"] <- "Something"
+}
+
+```
+
+#### (ii)
+
+According to the given information, the following operations are conducted:
+
+Create A Table Data Based on the Outcome:
+
+```{r, results = "asis", tidy = TRUE}
+# Calculate the Probability of Reaching A Deal with Method B:
+pander(count(d1[d1["ptest"] == 1, "deal"]))
+
+```
