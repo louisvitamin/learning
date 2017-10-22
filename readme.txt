@@ -1,1 +1,0 @@
-This repository is containing my self-learning materials.
